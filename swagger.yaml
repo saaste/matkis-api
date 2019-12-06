@@ -1,0 +1,477 @@
+swagger: "2.0"
+info:
+  description: "This is an API for Matkis public front-end."
+  version: "1.0.0"
+  title: "Matkis API"
+host: "localhost:3000"
+tags:
+- name: "diary"
+  description: "Diary endpoints"
+- name: "entry"
+  description: "Entry endpoints"
+- name: "date"
+  description: "Date endpoints"
+- name: "album"
+  description: "Album endpoints"
+schemes:
+- "http"
+paths:
+  /diaries:
+    get:
+      summary: "Get all diaries"
+      tags:
+      - "diary"
+      parameters:
+      - $ref: "#/parameters/Timezone"
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/DiaryList"
+        400:
+          description: "Timezone missing"
+        500:
+          description: "Internal server error"
+  
+  /diaries/{urlName}:
+    get:
+      summary: "Get a diary"
+      tags:
+      - "diary"
+      parameters:
+      - $ref: "#/parameters/Timezone"
+      - $ref: "#/parameters/UrlName"
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/Diary"
+        400:
+          description: "Timezone missing"
+        404:
+          description: "Diary not found"
+        500:
+          description: "Internal server error"
+
+  /diaries/{urlName}/entries:
+    get:
+      summary: "Get entries for the latests day"
+      tags:
+      - "entry"
+      parameters:
+      - $ref: "#/parameters/Timezone"
+      - $ref: "#/parameters/UrlName"
+      - name: comments
+        description: Include comments for each entry
+        in: query
+        required: false
+        type: boolean
+        default: true
+      - name: attachments
+        description: Include attachments for each entry
+        in: query
+        required: false
+        type: boolean
+        default: true
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/EntryList"
+        400:
+          description: "Timezone missing"
+        404:
+          description: "Diary not found"
+        500:
+          description: "Internal server error"
+          
+  /diaries/{urlName}/entries/date/{year}/{month}/{day}:
+    get:
+      summary: "Get entries for a specific day"
+      tags:
+      - "entry"
+      parameters:
+      - $ref: "#/parameters/Timezone"
+      - $ref: "#/parameters/UrlName"
+      - name: year
+        description: Year
+        in: path
+        required: true
+        type: number
+        format: int32
+      - name: month
+        description: Month
+        in: path
+        required: true
+        type: number
+        format: int32
+        minimum: 1
+        maximum: 12
+      - name: day
+        description: Day
+        in: path
+        required: true
+        type: number
+        format: int32
+        minimum: 1
+        maximum: 31
+      - name: comments
+        description: Include comments for each entry
+        in: query
+        required: false
+        type: boolean
+        default: true
+      - name: attachments
+        description: Include attachments for each entry
+        in: query
+        required: false
+        type: boolean
+        default: true
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/EntryList"
+        400:
+          description: "Timezone missing, or parameters or given date are not valid"
+        404:
+          description: "Diary not found"
+        500:
+          description: "Internal server error"
+  
+  /diaries/{urlName}/dates:
+    get:
+      summary: "Get dates for diary. If date is not gives, provides information for the latest date"
+      tags:
+      - "date"
+      parameters:
+      - $ref: "#/parameters/Timezone"
+      - $ref: "#/parameters/UrlName"
+      - name: year
+        description: Year
+        in: query
+        required: false
+        type: number
+        format: int32
+      - name: month
+        description: Month
+        in: query
+        required: false
+        type: number
+        format: int32
+        minimum: 1
+        maximum: 12
+      - name: day
+        description: Day
+        in: query
+        required: false
+        type: number
+        format: int32
+        minimum: 1
+        maximum: 31
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/Dates"
+        400:
+          description: "Timezone missing"
+        404:
+          description: "Diary not found"
+        500:
+          description: "Internal server error"
+
+  /diaries/{urlName}/albums:
+    get:
+      summary: "Get albums for an entry"
+      tags:
+      - "album"
+      parameters:
+      - $ref: "#/parameters/UrlName"
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/AlbumList"
+        404:
+          description: "Diary not found"
+        500:
+          description: "Internal server error"
+
+  /diaries/{urlName}/albums/{placeId}/attachments:
+    get:
+      summary: "Get album photos"
+      tags:
+      - "album"
+      parameters:
+      - $ref: "#/parameters/UrlName"
+      - name: placeId
+        description: Place ID
+        in: path
+        required: true
+        type: number
+        format: int32
+      responses:
+        200:
+          description: "All OK"
+          schema:
+            $ref: "#/definitions/PhotoList"
+        404:
+          description: "Diary or place not found"
+        500:
+          description: "Internal server error"
+
+parameters:
+  Timezone:
+    name: "X-Timezone"
+    description: |
+      Client timezone e.g. Europe/Helsinki.
+      See https://momentjs.com/timezone/
+    in: "header"
+    required: true
+    type: "string"
+  UrlName:
+    name: urlName
+    description: URL name of the diary e.g. indonesia2019
+    in: path
+    required: true
+    type: "string"
+
+definitions:
+  DiaryList:
+    type: "object"
+    required:
+    - diaries
+    properties:
+      diaries:
+        type: array
+        items:
+          $ref: "#/definitions/Diary"
+  
+  Diary:
+    type: object
+    required:
+      - id
+      - name
+      - urlName
+      - path
+    properties:
+      id:
+        type: integer
+        format: int32
+      name:
+        type: string
+      urlName:
+        type: string
+      path:
+        type: string
+        description: "Path the client can use as a link to the diary"
+  
+  EntryList:
+    type: object
+    required:
+    - dates
+    - entries
+    properties:
+      dates:
+        $ref: "#/definitions/Dates"
+      entries:
+        type: array
+        items:
+          $ref: "#/definitions/Entry"
+  
+  Entry:
+    type: object
+    required:
+    - id
+    - published
+    - latitude
+    - longitude
+    - content
+    - place
+    - author
+    - timeZoneOffset
+    properties:
+      id:
+        type: integer
+        format: int32
+      published:
+        type: string
+        format: date-time
+      latitude:
+        type: number
+        format: double
+      longitude:
+        type: number
+        format: double
+      content:
+        type: string
+      place:
+        type: object
+        required:
+        - name
+        - country
+        properties:
+          name:
+            type: string
+          country:
+            type: string
+      author:
+        type: object
+        required:
+        - name
+        properties:
+          name:
+            type: string
+      timeZoneOffset:
+        type: number
+        format: int32
+        description: Time difference in minutes from UTC
+      comments:
+        type: array
+        items:
+          type: object
+          required:
+          - id
+          - published
+          - content
+          - author
+          properties:
+            id:
+              type: number
+              format: int32
+            published:
+              type: string
+              format: date-time
+            content:
+              type: string
+            reply:
+              type: string
+            author:
+              type: object
+              required:
+              - name
+              properties:
+                name:
+                  type: string
+      attachments:
+        type: array
+        items:
+          type: object
+          required:
+          - id
+          - thumbnailUrl
+          - fullUrl
+          properties:
+            id:
+              type: number
+              format: int32
+            thumbnailUrl:
+              type: string
+              format: url
+              description: Temporary thumbnail URI. Can be used for 24h
+            fullUrl:
+              type: string
+              format: url
+              description: Temporary full image URL. Can be used for 24h
+          
+  Dates:
+    type: object
+    required:
+    - currentDate
+    properties:
+      currentDate:
+        type: string
+        format: date-time
+        description: Current/Reference time
+      previousDatePath:
+        type: string
+        description: "Path the client can use as a link to the previous day"
+      nextDatePath:
+        type: string
+        description: "Path the client can use as a link to the next day"
+        
+  AlbumList:
+    type: object
+    required:
+    - albums
+    properties:
+      albums:
+        type: array
+        items:
+          $ref: "#/definitions/CountryAlbum"
+          
+  CountryAlbum:
+    type: object
+    required:
+    - country
+    - albums
+    properties:
+      country:
+        type: string
+      albums:
+        type: array
+        items:
+          $ref: "#/definitions/PlaceAlbum"
+  
+  PlaceAlbum:
+    type: object
+    required:
+    - place
+    - photoCount
+    - previewImage
+    - path
+    properties:
+      place:
+        type: object
+        required:
+        - name
+        - country
+        properties:
+          name:
+            type: string
+          country:
+            type: string
+      photoCount:
+        type: number
+        format: int32
+      previewImage:
+        type: object
+        required:
+        - thumbnailUrl
+        - fullUrl
+        properties:
+          thumbnailUrl:
+            type: string
+            format: url
+            description: "Temporary thumbnail URI. Can be used for 24h"
+          fullUrl:
+            type: string
+            format: url
+            description: "Temporary full image URI. Can be used for 24h"
+      path:
+        type: string
+        description: "Path the client can use as a link to the album"
+  
+  PhotoList:
+    type: object
+    required:
+    - attachments
+    properties:
+      attachments:
+        type: array
+        items:
+          type: object
+          required:
+          - thumbnailUrl
+          - fullUrl
+          properties:
+            thumbnailUrl:
+              type: string
+              format: url
+              description: "Temporary thumbnail URI. Can be used for 24h"
+            fullUrl:
+              type: string
+              format: url
+              description: "Temporary full image URI. Can be used for 24h"
+          

@@ -1,0 +1,38 @@
+{
+  "name": "express-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "NODE_ENV=production node ./dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel ./src --out-dir dist",
+    "serve": "LOG_LEVEL=debug babel-watch src/server.js | ./node_modules/.bin/pino-pretty -t",
+    "clean": "rimraf dist"
+  },
+  "author": "Mika Hiltunen",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/storage-blob": "^12.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.27",
+    "mssql": "^6.0.1",
+    "pino": "^5.14.0",
+    "swagger-ui-express": "^4.1.2",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "babel-watch": "^7.0.0",
+    "pino-pretty": "^3.4.0",
+    "rimraf": "^3.0.0",
+    "standard": "^14.3.1"
+  }
+}
