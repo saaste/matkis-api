@@ -3,7 +3,8 @@ require('dotenv').config()
 export default {
   app: {
     port: process.env.PORT || 3000,
-    env: process.env.NODE_ENV || 'development'
+    env: process.env.NODE_ENV || 'development',
+    useMock: process.env.USE_MOCK === 'true' || false
   },
   database: {
     user: process.env.DB_USER,

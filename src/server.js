@@ -21,6 +21,10 @@ app.use(helmet())
 app.use(express.json())
 app.use(RequestLogger)
 
+if (config.app.useMock) {
+  app.use('/mock_photos', express.static('src/utils/mock_data/photos'))
+}
+
 app.get('/', (req, res) => {
   return res.sendStatus(200)
 })
@@ -33,4 +37,7 @@ app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(swaggerDocument));
 
 app.listen(port, () => {
   logger.info(`Server running in ${config.app.env.toUpperCase()} mode on port ${port}`)
+  if (config.app.useMock) {
+    logger.warn('SERVER IS RUNNING IN MOCK MODE')
+  }
 })
