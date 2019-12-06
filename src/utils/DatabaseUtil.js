@@ -1,25 +1,28 @@
-import sql from 'mssql'
+import Logger from './Logger'
 import config from '../config'
-import pino from 'pino'
+import sql from 'mssql'
 
-const logger = pino()
+const logger = Logger.create('DatabaseUtil')
 
 class DatabaseUtils {
     constructor() {
-        logger.info('Initializing database...')
-        
-        this.pool = new sql.ConnectionPool(config.database);
-        this.pool.on('error', err => {
-            logger.error(err, 'Database connection pool error')
-        })
+        if (config.app.useMock) {
+            logger.warn('Using mock data. Database not initialized')
+        } else {
+            logger.info('Initializing database...')
+            
+            this.pool = new sql.ConnectionPool(config.database);
+            this.pool.on('error', err => {
+                logger.error(err, 'Database connection pool error')
+            })
 
-        this.connection = this.pool.connect().then(con => {
-            logger.info('Database connection intialized')
-            return con
-        }).catch(err => {
-            logger.error(err, 'Error connecting database')
-        });
-
+            this.connection = this.pool.connect().then(con => {
+                logger.info('Database connection intialized')
+                return con
+            }).catch(err => {
+                logger.error(err, 'Error connecting database')
+            });
+        }
     }
 
     /**
